@@ -1,24 +1,37 @@
 package br.com.alura.alurafix.dto;
 
 import java.io.Serializable;
+import java.time.Instant;
+import br.com.alura.alurafix.entities.Video;
 
 public class VideoDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
-	private String titulo;
 	private String descricao;
+	private String titulo;
 	private String url;
+	private Instant createdAt;
+	private Instant updatedAt;
 
 	public VideoDTO() {
 
 	}
 
-	public VideoDTO(Long id, String titulo, String descricao, String url) {
+	public VideoDTO(Video entity) {
+		this.id = entity.getId();
+		this.descricao = entity.getDescricao();
+		this.titulo = entity.getTitulo();
+		this.url = entity.getUrl();
+		this.createdAt = entity.getCreatedAt();
+		this.updatedAt = entity.getUpdatedAt();
+	}
+
+	public VideoDTO(Long id, String descricao, String titulo, String url) {
 		this.id = id;
-		this.titulo = titulo;
 		this.descricao = descricao;
+		this.titulo = titulo;
 		this.url = url;
 	}
 
@@ -30,14 +43,6 @@ public class VideoDTO implements Serializable {
 		this.id = id;
 	}
 
-	public String getTitulo() {
-		return titulo;
-	}
-
-	public void setTitulo(String titulo) {
-		this.titulo = titulo;
-	}
-
 	public String getDescricao() {
 		return descricao;
 	}
@@ -46,12 +51,36 @@ public class VideoDTO implements Serializable {
 		this.descricao = descricao;
 	}
 
+	public String getTitulo() {
+		return titulo;
+	}
+
+	public void setTitulo(String titulo) {
+		this.titulo = titulo;
+	}
+
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Instant createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Instant getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Instant updatedAt) {
+		this.updatedAt = updatedAt;
 	}
 
 	@Override

@@ -22,11 +22,11 @@ public class Video implements Serializable {
     @SequenceGenerator(name="video_gen", sequenceName="video_seq")
 	private Long id;
 
-	@Column(name = "TITULO", length = 20)
-	private String titulo;
-
 	@Column(name = "DECRICAO", length = 20)
 	private String descricao;
+
+	@Column(name = "TITULO", length = 20)
+	private String titulo;
 
 	@Column(name = "URL", length = 80)
 	private String url;
@@ -41,10 +41,10 @@ public class Video implements Serializable {
 
 	}
 
-	public Video(Long id, String titulo, String descricao, String url) {
+	public Video(Long id, String descricao, String titulo, String url) {
 		this.id = id;
-		this.titulo = titulo;
 		this.descricao = descricao;
+		this.titulo = titulo;
 		this.url = url;
 	}
 
@@ -56,20 +56,20 @@ public class Video implements Serializable {
 		this.id = id;
 	}
 
-	public String getTitulo() {
-		return titulo;
-	}
-
-	public void setTitulo(String titulo) {
-		this.titulo = titulo;
-	}
-
 	public String getDescricao() {
 		return descricao;
 	}
 
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
+	}
+
+	public String getTitulo() {
+		return titulo;
+	}
+
+	public void setTitulo(String titulo) {
+		this.titulo = titulo;
 	}
 
 	public String getUrl() {
