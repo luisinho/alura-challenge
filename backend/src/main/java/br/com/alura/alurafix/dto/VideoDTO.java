@@ -2,6 +2,7 @@ package br.com.alura.alurafix.dto;
 
 import java.io.Serializable;
 import java.time.Instant;
+import javax.validation.constraints.NotBlank;
 import br.com.alura.alurafix.entities.Video;
 
 public class VideoDTO implements Serializable {
@@ -9,9 +10,16 @@ public class VideoDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
+
+	@NotBlank(message = "Campo descrição requirido")
 	private String descricao;
+
+	@NotBlank(message = "Campo titulo requirido")
 	private String titulo;
+
+	@NotBlank(message = "Campo url requirido")
 	private String url;
+
 	private Instant createdAt;
 	private Instant updatedAt;
 
