@@ -10,7 +10,7 @@ import br.com.alura.alurafix.repositories.VideoRepository;
 
 @Service
 public class VideoService {
-	
+
 	@Autowired
 	private VideoRepository videoRepository;
 
