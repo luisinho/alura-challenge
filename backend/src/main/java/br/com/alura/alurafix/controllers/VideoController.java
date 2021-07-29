@@ -1,9 +1,13 @@
 package br.com.alura.alurafix.controllers;
 
 import java.net.URI;
+import java.util.List;
+
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +23,22 @@ public class VideoController {
 
 	@Autowired
 	private VideoService videoService;
+
+	@GetMapping
+	public ResponseEntity<List<VideoDTO>> listarVideo() {
+
+		List<VideoDTO> lista = this.videoService.listarVideo();
+
+		return ResponseEntity.ok().body(lista);
+	}
+
+	@GetMapping(value = "/{id}")
+	public ResponseEntity<VideoDTO> buscarPorId(@PathVariable Long id) {
+
+		VideoDTO dto = this.videoService.buscarPorId(id);
+
+		return ResponseEntity.ok().body(dto);
+	}
 
 	@PostMapping
 	public ResponseEntity<VideoDTO> criarVideo(@Valid @RequestBody VideoDTO dto) {
