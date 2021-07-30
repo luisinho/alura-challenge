@@ -3,6 +3,8 @@ package br.com.alura.alurafix.dto;
 import java.io.Serializable;
 import java.time.Instant;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import br.com.alura.alurafix.entities.Video;
 
 public class VideoDTO implements Serializable {
@@ -11,13 +13,17 @@ public class VideoDTO implements Serializable {
 
 	private Long id;
 
-	@NotBlank(message = "Campo descrição requirido")
+	@NotBlank(message = "Campo descrição requirido!")
+	@Size(min = 5, max = 20, message = "O campo descrição deve ter entre 5 e 20 caracteres!")
 	private String descricao;
 
-	@NotBlank(message = "Campo titulo requirido")
+	@NotBlank(message = "Campo título requirido!")
+	@Size(min = 5, max = 20, message = "O campo título deve ter entre 5 e 20 caracteres!")
 	private String titulo;
 
-	@NotBlank(message = "Campo url requirido")
+	@NotBlank(message = "Campo url requirido!")
+	@Size(min = 24, max = 80, message = "O campo url deve ter entre 24 e 80 caracteres!")
+	@Pattern(regexp="^((https)\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.?be)\\/((watch\\?v=)?([a-zA-Z0-9]{11}))(&.*)*$", message = "Campo url inválido!")
 	private String url;
 
 	private Instant createdAt;
