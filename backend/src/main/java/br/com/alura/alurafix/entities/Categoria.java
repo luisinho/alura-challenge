@@ -1,44 +1,31 @@
 package br.com.alura.alurafix.entities;
 
-import java.io.Serializable;
 import java.time.Instant;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "tb_video")
-public class Video implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+@Table(name = "tb_categoria")
+public class Categoria {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "video_gen")
-    @SequenceGenerator(name="video_gen", sequenceName="video_seq")
-	private Long id;
-
-	@Column(name = "DECRICAO", length = 20)
-	private String descricao;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categoria_gen")
+    @SequenceGenerator(name="categoria_gen", sequenceName="categoria_seq")
+	public Long id;
 
 	@Column(name = "TITULO", length = 20)
-	private String titulo;
+	public String titulo;
 
-	@Column(name = "URL", length = 80)
-	private String url;
-
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "categoria_id")
-	private Categoria categoria;
+	@Column(name = "COR", length = 10)
+	public String cor;
 
 	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
 	private Instant createdAt;
@@ -46,15 +33,14 @@ public class Video implements Serializable {
 	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
 	private Instant updatedAt;
 
-	public Video() {
+	public Categoria() {
 
 	}
 
-	public Video(Long id, String descricao, String titulo, String url) {
+	public Categoria(Long id, String titulo, String cor) {
 		this.id = id;
-		this.descricao = descricao;
 		this.titulo = titulo;
-		this.url = url;
+		this.cor = cor;
 	}
 
 	public Long getId() {
@@ -65,14 +51,6 @@ public class Video implements Serializable {
 		this.id = id;
 	}
 
-	public String getDescricao() {
-		return descricao;
-	}
-
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
-
 	public String getTitulo() {
 		return titulo;
 	}
@@ -81,20 +59,12 @@ public class Video implements Serializable {
 		this.titulo = titulo;
 	}
 
-	public String getUrl() {
-		return url;
+	public String getCor() {
+		return cor;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public Categoria getCategoria() {
-		return categoria;
-	}
-
-	public void setCategoria(Categoria categoria) {
-		this.categoria = categoria;
+	public void setCor(String cor) {
+		this.cor = cor;
 	}
 
 	public Instant getCreatedAt() {
@@ -131,7 +101,7 @@ public class Video implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Video other = (Video) obj;
+		Categoria other = (Categoria) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
