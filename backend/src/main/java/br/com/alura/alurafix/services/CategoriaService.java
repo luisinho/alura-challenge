@@ -1,13 +1,16 @@
 package br.com.alura.alurafix.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.alura.alurafix.dto.CategoriaDTO;
 import br.com.alura.alurafix.entities.Categoria;
+import br.com.alura.alurafix.exceptions.RegisterNotFoundException;
 import br.com.alura.alurafix.repositories.CategoriaRepository;
 import br.com.alura.alurafix.services.exceptions.DataBaseException;
 
@@ -23,6 +26,16 @@ public class CategoriaService {
 		List<Categoria> lista = this.categoriaRepository.findAll();
 
 		return lista.stream().map(categoria -> new CategoriaDTO(categoria)).collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
+	public CategoriaDTO buscarPorId(Long id) {
+
+		Optional<Categoria> obj = this.categoriaRepository.findById(id);
+
+		Categoria entity = obj.orElseThrow(() -> new RegisterNotFoundException());
+
+		return new CategoriaDTO(entity);
 	}
 
 	@Transactional

@@ -21,8 +21,8 @@ public class ControllerExceptionHandler {
 		StandardError err = new StandardError();
 		err.setTimestamp(Instant.now());
 		err.setStatus(status.value());
-		err.setError("Não encontrado");
-		err.setMessage(e.getMessage());
+		err.setError("");
+		err.setMessage("Não encontrado");
 		err.setPath(request.getRequestURI());
 
 		return ResponseEntity.status(status).body(err);
