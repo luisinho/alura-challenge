@@ -1,5 +1,7 @@
 package br.com.alura.alurafix.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,14 @@ public class CategoriaService {
 
 	@Autowired
 	private CategoriaRepository categoriaRepository;
+
+	@Transactional(readOnly = true)
+	public List<CategoriaDTO> listarCategoria() {
+
+		List<Categoria> lista = this.categoriaRepository.findAll();
+
+		return lista.stream().map(categoria -> new CategoriaDTO(categoria)).collect(Collectors.toList());
+	}
 
 	@Transactional
 	public 	CategoriaDTO criarCategoria(CategoriaDTO  dto) {
@@ -35,7 +45,7 @@ public class CategoriaService {
 
 	private void copyDtoToEntity(CategoriaDTO dto, Categoria entity) {
 
-		entity.setCor(dto.getCor());
-		entity.setTitulo(dto.getTitulo());
+		entity.setCor(dto.getCor().trim());
+		entity.setTitulo(dto.getTitulo().trim());
 	}
 }

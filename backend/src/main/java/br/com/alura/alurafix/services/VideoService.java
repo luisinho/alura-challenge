@@ -100,8 +100,8 @@ public class VideoService {
 
 	private void copyDtoToEntity(VideoDTO dto, Video entity) {
 
-		entity.setDescricao(dto.getDescricao());
-		entity.setTitulo(dto.getTitulo());
-		entity.setUrl(dto.getUrl());
+		entity.setDescricao(dto.getDescricao().trim());
+		entity.setTitulo(dto.getTitulo().trim());
+		entity.setUrl(dto.getUrl().trim());
 	}
 }

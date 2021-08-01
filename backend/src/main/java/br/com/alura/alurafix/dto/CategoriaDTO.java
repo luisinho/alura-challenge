@@ -14,10 +14,12 @@ public class CategoriaDTO implements Serializable {
 
 	public Long id;
 
-	@NotBlank(message = "Campo descrição requirido!")
-	@Size(min = 5, max = 20, message = "O campo descrição deve ter entre 5 e 20 caracteres!")
+	@NotBlank(message = "Campo titulo requirido!")
+	@Size(min = 5, max = 20, message = "O campo titulo deve ter entre 5 e 20 caracteres!")
 	public String titulo;
 
+	@NotBlank(message = "Campo cor requirido!")
+	@Size(min = 3, max = 10, message = "O campo cor deve ter entre 3 e 10 caracteres!")
 	public String cor;
 
 	private Instant createdAt;

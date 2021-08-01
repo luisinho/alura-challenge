@@ -1,11 +1,13 @@
 package br.com.alura.alurafix.controllers;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +23,14 @@ public class CategoriaController {
 
 	@Autowired
 	private CategoriaService categoriaService;
+
+	@GetMapping
+	public ResponseEntity<List<CategoriaDTO>> listarCategoria() {
+
+		List<CategoriaDTO> lista = this.categoriaService.listarCategoria();
+
+		return ResponseEntity.ok(lista);
+	}
 
 	@PostMapping
 	public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO dto) {
