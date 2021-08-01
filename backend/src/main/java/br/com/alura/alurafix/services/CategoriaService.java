@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,30 @@ public class CategoriaService {
 
 		}catch (Exception e) {
 			throw new DataBaseException("Ocorreu um erro ao criar a categoria!");
+		}
+
+		return new CategoriaDTO(entity);
+	}
+
+	@Transactional
+	public CategoriaDTO atualizarCategoria(Long id, CategoriaDTO dto) {
+
+		Categoria entity = null;
+
+		try {
+
+			entity = this.categoriaRepository.getById(id);
+
+			this.copyDtoToEntity(dto, entity);
+
+			entity = this.categoriaRepository.save(entity);
+
+		} catch (EmptyResultDataAccessException e) {
+			throw new DataBaseException("Id não encontrado " + id);
+		}catch  (DataIntegrityViolationException e) {
+			throw new DataBaseException("Integrity violation");
+		} catch (Exception e) {
+			throw new DataBaseException("Ocorreu um erro ao atualizar a categoria!" + id);
 		}
 
 		return new CategoriaDTO(entity);

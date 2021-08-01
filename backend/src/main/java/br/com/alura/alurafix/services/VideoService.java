@@ -52,7 +52,7 @@ public class VideoService {
 			entity = this.videoRepository.save(entity);
 
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao criar o video");
+			throw new DataBaseException("Ocorreu um erro ao criar o video!");
 		}
 
 		return new VideoDTO(entity);
@@ -76,7 +76,7 @@ public class VideoService {
 		}catch  (DataIntegrityViolationException e) {
 			throw new DataBaseException("Integrity violation");
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao atualizar o video" + id);
+			throw new DataBaseException("Ocorreu um erro ao atualizar o video!" + id);
 		}
 
 		return new VideoDTO(entity);
