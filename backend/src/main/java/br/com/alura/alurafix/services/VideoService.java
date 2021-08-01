@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.alura.alurafix.dto.VideoDTO;
+import br.com.alura.alurafix.entities.Categoria;
 import br.com.alura.alurafix.entities.Video;
 import br.com.alura.alurafix.exceptions.RegisterNotFoundException;
 import br.com.alura.alurafix.repositories.VideoRepository;
@@ -21,6 +22,9 @@ public class VideoService {
 
 	@Autowired
 	private VideoRepository videoRepository;
+
+	@Autowired
+	private CategoriaService categoriaService;
 
 	@Transactional(readOnly = true)
 	public List<VideoDTO> listarVideo() {
@@ -41,7 +45,7 @@ public class VideoService {
 	}
 
 	@Transactional
-	public VideoDTO criarVideo(VideoDTO dto) {
+	public VideoDTO criarVideo(VideoDTO dto) throws Exception{
 
 		Video entity = new Video();
 
@@ -51,6 +55,8 @@ public class VideoService {
 
 			entity = this.videoRepository.save(entity);
 
+		} catch(RegisterNotFoundException e) {
+			throw new RegisterNotFoundException(e.getMessage());
 		} catch (Exception e) {
 			throw new DataBaseException("Ocorreu um erro ao criar o video!");
 		}
@@ -103,5 +109,14 @@ public class VideoService {
 		entity.setDescricao(dto.getDescricao().trim());
 		entity.setTitulo(dto.getTitulo().trim());
 		entity.setUrl(dto.getUrl().trim());
+
+		if (dto.getCategoria() != null) {
+
+			Categoria  categoria = this.categoriaService.buscarPorId(dto.getCategoria());
+
+			if (categoria != null) {
+				entity.setCategoria(categoria);
+			}
+		}
 	}
 }

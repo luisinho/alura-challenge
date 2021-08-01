@@ -35,9 +35,19 @@ public class CategoriaService {
 
 		Optional<Categoria> obj = this.categoriaRepository.findById(id);
 
-		Categoria entity = obj.orElseThrow(() -> new RegisterNotFoundException());
+		Categoria entity = obj.orElseThrow(() -> new RegisterNotFoundException("Não encontrada."));
 
 		return new CategoriaDTO(entity);
+	}
+
+	@Transactional(readOnly = true)
+	public Categoria buscarPorId(CategoriaDTO dto) {
+
+		Optional<Categoria> obj = this.categoriaRepository.findById(dto.getId());
+
+		Categoria entity = obj.orElseThrow(() -> new RegisterNotFoundException("Categoria não encontrada"));
+
+		return entity;
 	}
 
 	@Transactional

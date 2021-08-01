@@ -22,7 +22,7 @@ public class ControllerExceptionHandler {
 		err.setTimestamp(Instant.now());
 		err.setStatus(status.value());
 		err.setError("");
-		err.setMessage("Não encontrado");
+		err.setMessage(e.getMessage());
 		err.setPath(request.getRequestURI());
 
 		return ResponseEntity.status(status).body(err);

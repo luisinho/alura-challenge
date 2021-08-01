@@ -41,7 +41,7 @@ public class VideoController {
 	}
 
 	@PostMapping
-	public ResponseEntity<VideoDTO> criarVideo(@Valid @RequestBody VideoDTO dto) {
+	public ResponseEntity<VideoDTO> criarVideo(@Valid @RequestBody VideoDTO dto) throws Exception {
 
 		dto = this.videoService.criarVideo(dto);
 

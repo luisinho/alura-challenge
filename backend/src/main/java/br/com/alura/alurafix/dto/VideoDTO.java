@@ -26,6 +26,8 @@ public class VideoDTO implements Serializable {
 	@Pattern(regexp="^((https)\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.?be)\\/((watch\\?v=)?([a-zA-Z0-9]{11}))(&.*)*$", message = "Campo url inválido!")
 	private String url;
 
+	private CategoriaDTO categoria;
+
 	private Instant createdAt;
 	private Instant updatedAt;
 
@@ -40,6 +42,10 @@ public class VideoDTO implements Serializable {
 		this.url = entity.getUrl();
 		this.createdAt = entity.getCreatedAt();
 		this.updatedAt = entity.getUpdatedAt();
+
+		if (entity.getCategoria() != null) {
+			this.categoria = new CategoriaDTO(entity.getCategoria());
+		}
 	}
 
 	public VideoDTO(Long id, String descricao, String titulo, String url) {
@@ -79,6 +85,14 @@ public class VideoDTO implements Serializable {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public CategoriaDTO getCategoria() {
+		return categoria;
+	}
+
+	public void setCategoria(CategoriaDTO categoria) {
+		this.categoria = categoria;
 	}
 
 	public Instant getCreatedAt() {
