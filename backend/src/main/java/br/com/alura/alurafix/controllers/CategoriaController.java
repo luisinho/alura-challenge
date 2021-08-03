@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,14 @@ public class CategoriaController {
 		return ResponseEntity.ok().body(dto);
 	}
 
+	@GetMapping(value = "/{id}/videos")
+	public ResponseEntity<CategoriaDTO> obterCategoriaVideos(@PathVariable Long id) {
+
+		CategoriaDTO dto = this.categoriaService.obterCategoriaVideos(id);
+
+		return ResponseEntity.ok().body(dto);
+	}
+
 	@PostMapping
 	public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO dto) {
 
@@ -61,5 +70,13 @@ public class CategoriaController {
 		dto = this.categoriaService.atualizarCategoria(id, dto);
 
 		return ResponseEntity.ok().body(dto);
+	}
+
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<String> deletarCategoria(@PathVariable Long id) {
+
+		this.categoriaService.deletarCategoria(id);
+
+		return ResponseEntity.ok(new String("Categoria deletada com sucesso."));
 	}
 }

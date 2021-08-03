@@ -2,11 +2,14 @@ package br.com.alura.alurafix.dto;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import br.com.alura.alurafix.entities.Categoria;
+import br.com.alura.alurafix.entities.Video;
 
 public class CategoriaDTO implements Serializable {	
 
@@ -22,6 +25,8 @@ public class CategoriaDTO implements Serializable {
 	@Size(min = 3, max = 10, message = "O campo cor deve ter entre 3 e 10 caracteres!")
 	public String cor;
 
+	private Set<VideoDTO> videos = new HashSet<VideoDTO>();
+
 	private Instant createdAt;
 	private Instant updatedAt;
 
@@ -34,7 +39,16 @@ public class CategoriaDTO implements Serializable {
 		this.titulo = entity.getTitulo();
 		this.cor = entity.getCor();
 		this.createdAt = entity.getCreatedAt();
-		this.updatedAt = entity.getUpdatedAt();
+		this.updatedAt = entity.getUpdatedAt();		
+	}
+
+	public CategoriaDTO(Categoria entity, Set<Video> videos) {
+
+		this(entity);
+
+		if (videos != null && !videos.isEmpty()) {
+			videos.stream().forEach(video -> this.videos.add(new VideoDTO(video)));
+		}
 	}
 
 	public CategoriaDTO(Long id, String titulo, String cor) {
@@ -65,6 +79,10 @@ public class CategoriaDTO implements Serializable {
 
 	public void setCor(String cor) {
 		this.cor = cor;
+	}
+
+	public Set<VideoDTO> getVideos() {
+		return videos;
 	}
 
 	public Instant getCreatedAt() {

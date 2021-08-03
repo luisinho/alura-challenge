@@ -1,12 +1,16 @@
 package br.com.alura.alurafix.entities;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
@@ -26,6 +30,9 @@ public class Categoria {
 
 	@Column(name = "COR", length = 10)
 	public String cor;
+
+	@OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+	private Set<Video> videos = new HashSet<Video>();
 
 	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
 	private Instant createdAt;
@@ -65,6 +72,10 @@ public class Categoria {
 
 	public void setCor(String cor) {
 		this.cor = cor;
+	}
+
+	public Set<Video> getVideos() {
+		return videos;
 	}
 
 	public Instant getCreatedAt() {

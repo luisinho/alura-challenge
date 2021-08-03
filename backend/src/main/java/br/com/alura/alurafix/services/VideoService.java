@@ -1,5 +1,6 @@
 package br.com.alura.alurafix.services;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import br.com.alura.alurafix.dto.VideoDTO;
 import br.com.alura.alurafix.entities.Categoria;
 import br.com.alura.alurafix.entities.Video;
 import br.com.alura.alurafix.exceptions.RegisterNotFoundException;
+import br.com.alura.alurafix.exceptions.RegraNegocioException;
 import br.com.alura.alurafix.repositories.VideoRepository;
 import br.com.alura.alurafix.services.exceptions.DataBaseException;
 
@@ -27,7 +29,16 @@ public class VideoService {
 	private CategoriaService categoriaService;
 
 	@Transactional(readOnly = true)
-	public List<VideoDTO> listarVideo() {
+	public List<VideoDTO> listarVideo(String search) {
+
+		if (!"".equals(search)) {
+
+			Optional<Video> obj = this.videoRepository.findByTitulo(search);
+
+			Video entity = obj.orElseThrow(() -> new RegraNegocioException("Não foi encontrado o vídeo " + search));
+
+			return Arrays.asList(new VideoDTO(entity));
+		}
 
 		List<Video> lista = this.videoRepository.findAll();
 
@@ -82,7 +93,7 @@ public class VideoService {
 		}catch  (DataIntegrityViolationException e) {
 			throw new DataBaseException("Integrity violation");
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao atualizar o video!" + id);
+			throw new DataBaseException("Ocorreu um erro ao atualizar o video " + id);
 		}
 
 		return new VideoDTO(entity);
