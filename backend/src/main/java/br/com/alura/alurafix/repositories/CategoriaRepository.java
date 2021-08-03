@@ -1,5 +1,7 @@
 package br.com.alura.alurafix.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +16,8 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
 	@Query("SELECT COUNT(cat.id) FROM Categoria cat INNER JOIN cat.videos video WHERE video.categoria.id = :categoriaId")
 	public long countVideoPorCategoria(@Param("categoriaId") Long categoriaId);
+
+	public long countByTituloIgnoreCase(String titulo);
+
+	public Optional<Categoria> findByTituloIgnoreCase(String titulo);
 }

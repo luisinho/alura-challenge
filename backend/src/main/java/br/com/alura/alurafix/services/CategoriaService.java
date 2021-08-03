@@ -59,6 +59,16 @@ public class CategoriaService {
 		return new CategoriaDTO(entity, entity.getVideos());
 	}
 
+	@Transactional(readOnly = true)
+	public Categoria obterCategoriaPorTitulo(String titulo) {
+
+		Optional<Categoria> obj = this.categoriaRepository.findByTituloIgnoreCase(titulo);
+
+		Categoria entity = obj.orElseThrow(() -> new RegisterNotFoundException("Categoria não encontrada!"));
+
+		return entity;
+	}
+
 	@Transactional
 	public 	CategoriaDTO criarCategoria(CategoriaDTO  dto) {
 
@@ -66,11 +76,15 @@ public class CategoriaService {
 
 		try {
 
+			this.validarNomeCategoria(dto);
+
 			this.copyDtoToEntity(dto, entity);
 
 			entity = this.categoriaRepository.save(entity);
 
-		}catch (Exception e) {
+		} catch(RegraNegocioException e) {
+			throw new RegraNegocioException(e.getMessage());
+		} catch (Exception e) {
 			throw new DataBaseException("Ocorreu um erro ao criar a categoria!");
 		}
 
@@ -133,5 +147,24 @@ public class CategoriaService {
 
 		entity.setCor(dto.getCor().trim());
 		entity.setTitulo(dto.getTitulo().trim());
+	}
+
+	private void validarNomeCategoria(CategoriaDTO dto) {
+
+		long count = this.categoriaRepository.count();
+
+		if (dto.getTitulo().equalsIgnoreCase("LIVRE")) {
+			dto.setTitulo(dto.getTitulo().toUpperCase());
+		}
+
+		if (count == 0 && !dto.getTitulo().equals("LIVRE")) {
+			throw new RegraNegocioException("Não existe categoria cadastrada no banco de dados.A primeira categoria deve ser cadastrada com o título conforme o exemplo LIVRE.");
+		}
+
+		count = this.categoriaRepository.countByTituloIgnoreCase(dto.getTitulo());
+
+		if (count > 0) {
+			throw new RegraNegocioException("Já existe a categoria com o título " + dto.getTitulo());
+		}
 	}
 }

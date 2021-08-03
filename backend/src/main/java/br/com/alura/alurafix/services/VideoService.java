@@ -116,18 +116,22 @@ public class VideoService {
 	}
 
 	private void copyDtoToEntity(VideoDTO dto, Video entity) {
+		
+		final String CATEGORIA_TITULO_LIVRE = "LIVRE";
 
 		entity.setDescricao(dto.getDescricao().trim());
 		entity.setTitulo(dto.getTitulo().trim());
 		entity.setUrl(dto.getUrl().trim());
 
-		if (dto.getCategoria() != null) {
+		if (dto.getCategoria() == null || dto.getCategoria().getId() == null) {
+
+			Categoria  categoria = this.categoriaService.obterCategoriaPorTitulo(CATEGORIA_TITULO_LIVRE);
+			entity.setCategoria(categoria);
+
+		} else {
 
 			Categoria  categoria = this.categoriaService.buscarPorId(dto.getCategoria());
-
-			if (categoria != null) {
-				entity.setCategoria(categoria);
-			}
+			entity.setCategoria(categoria);
 		}
 	}
 }
