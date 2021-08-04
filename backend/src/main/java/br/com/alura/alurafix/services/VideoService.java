@@ -69,7 +69,7 @@ public class VideoService {
 		} catch(RegisterNotFoundException e) {
 			throw new RegisterNotFoundException(e.getMessage());
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao criar o video!");
+			throw new DataBaseException(e.getMessage());
 		}
 
 		return new VideoDTO(entity);
