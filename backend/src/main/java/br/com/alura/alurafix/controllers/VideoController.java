@@ -29,26 +29,26 @@ public class VideoController {
 	private VideoService videoService;
 
 	@GetMapping
-	public ResponseEntity<List<VideoDTO>> listarVideo(
+	public ResponseEntity<List<VideoDTO>> findAllPaged(
 			@RequestParam(value = "search", defaultValue = "") String search) {
 
-		List<VideoDTO> lista = this.videoService.listarVideo(search);
+		List<VideoDTO> lista = this.videoService.findAllPaged(search);
 
 		return ResponseEntity.ok().body(lista);
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<VideoDTO> buscarPorId(@PathVariable Long id) {
+	public ResponseEntity<VideoDTO> findById(@PathVariable Long id) {
 
-		VideoDTO dto = this.videoService.buscarPorId(id);
+		VideoDTO dto = this.videoService.findById(id);
 
 		return ResponseEntity.ok().body(dto);
 	}
 
 	@PostMapping
-	public ResponseEntity<VideoDTO> criarVideo(@Valid @RequestBody VideoDTO dto) throws Exception {
+	public ResponseEntity<VideoDTO> save(@Valid @RequestBody VideoDTO dto) throws Exception {
 
-		dto = this.videoService.criarVideo(dto);
+		dto = this.videoService.save(dto);
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
 				                             .path("/{id}")
@@ -59,18 +59,18 @@ public class VideoController {
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<VideoDTO> atualizarVideo(@PathVariable Long id, @Valid @RequestBody VideoDTO dto) {
+	public ResponseEntity<VideoDTO> update(@PathVariable Long id, @Valid @RequestBody VideoDTO dto) {
 
-		dto = this.videoService.atualizarVideo(id, dto);
+		dto = this.videoService.update(id, dto);
 
 		return ResponseEntity.ok().body(dto);
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<VideoDTO> deletarVideo(@PathVariable Long id) {
+	public ResponseEntity<String> delete(@PathVariable Long id) {
 
-		this.videoService.deletarVideo(id);
+		this.videoService.delete(id);
 
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok().body(new String("Vídeo removido com sucesso."));
 	}
 }

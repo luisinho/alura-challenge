@@ -29,13 +29,13 @@ public class VideoService {
 	private CategoriaService categoriaService;
 
 	@Transactional(readOnly = true)
-	public List<VideoDTO> listarVideo(String search) {
+	public List<VideoDTO> findAllPaged(String search) {
 
 		if (!"".equals(search)) {
 
 			Optional<Video> obj = this.videoRepository.findByTitulo(search);
 
-			Video entity = obj.orElseThrow(() -> new RegraNegocioException("Não foi encontrado o vídeo " + search));
+			Video entity = obj.orElseThrow(() -> new RegisterNotFoundException("Não foi encontrado o vídeo " + search));
 
 			return Arrays.asList(new VideoDTO(entity));
 		}
@@ -46,17 +46,17 @@ public class VideoService {
 	}
 
 	@Transactional(readOnly = true)
-	public VideoDTO buscarPorId(Long id) {
+	public VideoDTO findById(Long id) {
 
 		Optional<Video> obj = this.videoRepository.findById(id);
 
-		Video entity = obj.orElseThrow(() -> new RegisterNotFoundException());
+		Video entity = obj.orElseThrow(() -> new RegisterNotFoundException("Não foi encontrado o vídeo com o ID " + id));
 
 		return new VideoDTO(entity);
 	}
 
 	@Transactional
-	public VideoDTO criarVideo(VideoDTO dto) throws Exception{
+	public VideoDTO save(VideoDTO dto) throws Exception{
 
 		Video entity = new Video();
 
@@ -76,7 +76,7 @@ public class VideoService {
 	}
 
 	@Transactional
-	public VideoDTO atualizarVideo(Long id, VideoDTO dto) {
+	public VideoDTO update(Long id, VideoDTO dto) {
 
 		Video entity = null;
 
@@ -89,7 +89,7 @@ public class VideoService {
 			entity = this.videoRepository.save(entity);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new DataBaseException("Id não encontrado " + id);
+			throw new RegisterNotFoundException("Id não encontrado " + id);
 		}catch  (DataIntegrityViolationException e) {
 			throw new DataBaseException("Integrity violation");
 		} catch (Exception e) {
@@ -100,14 +100,14 @@ public class VideoService {
 	}
 
 	@Transactional
-	public void deletarVideo(Long id) {
+	public void delete(Long id) {
 
 		try {
 
 			this.videoRepository.deleteById(id);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new DataBaseException("Id não encontrado " + id);
+			throw new RegisterNotFoundException("Id não encontrado " + id);
 		}catch  (DataIntegrityViolationException e) {
 			throw new DataBaseException("Integrity violation");
 		} catch (Exception e) {
