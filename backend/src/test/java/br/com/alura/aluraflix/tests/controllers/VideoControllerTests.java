@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -50,16 +52,16 @@ public class VideoControllerTests {
 	private VideoDTO existingVideoDTO;
 
 	private PageImpl<VideoDTO> page;
-	
-	private List<VideoDTO> lista;
 
 	private Long existingId;
 	
 	private Long nonExistingId;
 	
-	private String existingSearch;
+	private String existingTitle;
 
-	private String nonExistingSearch;
+	private String nonExistingTitle;
+
+	private PageRequest pageRequest;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -68,17 +70,21 @@ public class VideoControllerTests {
 
 		this.nonExistingId = 2l;
 
-		this.existingSearch = "TESTEVIDEO";
+		this.existingTitle = "TESTEVIDEO";
 
-		this.nonExistingSearch = "nonExisting";
+		this.nonExistingTitle = "_____";
+
+		this.pageRequest  = PageRequest.of(0, 5, Direction.valueOf("ASC"),  "titulo");
 
 		this.newVideoDTO = VideoFactory.createVideoDTO(null);
 
 		this.existingVideoDTO = VideoFactory.createVideoDTO(this.existingId);
 
-		when(this.videoService.findAllPaged("")).thenReturn(this.lista);
-		
-		when(this.videoService.findAllPaged(this.existingSearch)).thenReturn(this.lista);
+		this.page = new PageImpl<>(Arrays.asList(this.existingVideoDTO));
+
+		when(this.videoService.findAllPaged("", this.pageRequest)).thenReturn(this.page);		
+
+		when(this.videoService.findAllPaged(this.existingTitle, this.pageRequest)).thenReturn(this.page);
 
 		when(this.videoService.findById(this.existingId)).thenReturn(this.existingVideoDTO);
 
@@ -86,7 +92,7 @@ public class VideoControllerTests {
 
 		when(this.videoService.update(eq(this.existingId), any())).thenReturn(this.existingVideoDTO);
 
-		when(this.videoService.findAllPaged(this.nonExistingSearch)).thenThrow(RegisterNotFoundException.class);
+		when(this.videoService.findAllPaged(this.nonExistingTitle, this.pageRequest)).thenThrow(RegisterNotFoundException.class);
 
 		when(this.videoService.findById(this.nonExistingId)).thenThrow(RegisterNotFoundException.class);
 
@@ -106,20 +112,8 @@ public class VideoControllerTests {
 			   .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
-		// result.andExpect(jsonPath("$.content").exists());
-	}
-
-	@Test
-	public void findAllShouldReturnPageWhenExistingSearch() throws Exception {
-
-		ResultActions result =
-		   this.mockMvc.perform(get("/videos?search=" + this.existingSearch)
-			   .contentType(MediaType.APPLICATION_JSON)
-			   .accept(MediaType.APPLICATION_JSON));
-
-		result.andExpect(status().isOk());
-		// result.andExpect(jsonPath("$.content").exists());
-	}
+		result.andExpect(jsonPath("$.content").exists());
+	}	
 
 	@Test
 	public void findByIdShouldReturnVideoDTOWhenIdExists() throws Exception {
@@ -132,6 +126,17 @@ public class VideoControllerTests {
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$.id").exists());
 		result.andExpect(jsonPath("$.id").value(this.existingId));
+	}
+
+	@Test
+	public void findByIdShouldReturnVideoDTOWhenTitleExists() throws Exception {
+
+		ResultActions result =
+				   this.mockMvc.perform(get("/videos?search=" + this.existingTitle)
+					   .accept(MediaType.APPLICATION_JSON));
+
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("$.content").exists());
 	}
 
 	@Test
@@ -180,18 +185,7 @@ public class VideoControllerTests {
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$").value("Vídeo removido com sucesso."));
-	}
-
-	@Test
-	public void findAllShouldReturnNotFoundNonExistingSearch() throws Exception {
-
-		ResultActions result =
-		   this.mockMvc.perform(get("/videos?search=" + this.nonExistingSearch)
-			   .contentType(MediaType.APPLICATION_JSON)
-			   .accept(MediaType.APPLICATION_JSON));
-
-		result.andExpect(status().isNotFound());
-	}
+	}	
 
 	@Test
 	public void findByIdShouldReturnNotFoundWhenIdDoesNotExists() throws Exception {
@@ -201,6 +195,17 @@ public class VideoControllerTests {
 					   .accept(MediaType.APPLICATION_JSON));
 
 				result.andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void findAllShouldReturnNotFoundNonExistingTitle() throws Exception {
+
+		ResultActions result =
+		   this.mockMvc.perform(get("/videos?search=" + this.nonExistingTitle)
+			   .contentType(MediaType.APPLICATION_JSON)
+			   .accept(MediaType.APPLICATION_JSON));
+
+		result.andExpect(status().isNotFound());
 	}
 
 	@Test

@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.alura.aluraflix.dto.CategoryDTO;
@@ -51,16 +50,10 @@ public class CategoryControllerTests {
 
 	private PageImpl<CategoryDTO> page;
 
-	private List<CategoryDTO> lista;
-
 	private Long existingId;
 
-	private Long nonExistingId;
+	private Long nonExistingId;	
 
-	private String existingTitle;
-
-	private String nonExistingTitle;
-	
 	@BeforeEach
 	void setUp() throws Exception {
 
@@ -68,15 +61,13 @@ public class CategoryControllerTests {
 
 		this.nonExistingId = -1l;
 
-		this.existingTitle = "LIVRE";
-
-		this.nonExistingTitle = "nonExisting ";
-
 		this.newCategoryDTO = CategoryFactory.createCategoryDTO(null);
 
 		this.existingCategoryDTO = CategoryFactory.createCategoryDTO(this.existingId);
 
-		when(this.categoryService.findAllPaged()).thenReturn(this.lista);
+		this.page = new PageImpl<>(Arrays.asList(this.existingCategoryDTO));
+
+		when(this.categoryService.findAllPaged(any())).thenReturn(this.page);
 
 		when(this.categoryService.findById(this.existingId)).thenReturn(this.existingCategoryDTO);
 		
@@ -106,7 +97,7 @@ public class CategoryControllerTests {
 			   .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
-		// result.andExpect(jsonPath("$.content").exists());
+		result.andExpect(jsonPath("$.content").exists());
 	}
 
 	@Test

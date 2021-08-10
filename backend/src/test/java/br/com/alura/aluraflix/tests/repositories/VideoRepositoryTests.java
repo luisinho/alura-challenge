@@ -1,6 +1,7 @@
 package br.com.alura.aluraflix.tests.repositories;
 
 import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,18 +26,26 @@ public class VideoRepositoryTests {
 	private VideoRepository videoRepository;
 
 	private long existingId;
+
 	private long nonExistingId;
-	private String changeDescription;
+
 	private long countVideos;
+
 	private Pageable pageable;
+
+	private String changeDescription;	
 
 	@BeforeEach
 	void setUp() throws Exception {
 
 		this.existingId = 1;
+
 		this.nonExistingId = -1;
-		this.changeDescription = "Teste Video1";
+
 		this.countVideos = 1;
+
+		this.changeDescription = "Teste Video1";
+
 		this.pageable = PageRequest.of(0, 10);
 	}
 
@@ -48,6 +57,16 @@ public class VideoRepositoryTests {
 		Assertions.assertFalse(result.isEmpty());
 
 		Assertions.assertTrue(result.getTotalElements() >= this.countVideos);
+	}
+
+	@Test
+	public void findShouldReturnVideoWhenTitleExists() {
+		
+		String titleSearch = "TESTEVIDEO";
+		
+		Page<Video> result = this.videoRepository.findTitle(titleSearch, this.pageable);
+
+		Assertions.assertNotNull(result.getContent());
 	}
 
 	@Test
@@ -98,26 +117,16 @@ public class VideoRepositoryTests {
 		Optional<Video> result = this.videoRepository.findById(this.existingId);
 
 		Assertions.assertFalse(result.isPresent());
-	}
+	}	
 
 	@Test
-	public void findShouldReturnVideoWhenTituloNotEmpty() {
-		
-		String titleSearch = "TESTEVIDEO";
-		
-		Optional<Video> result = this.videoRepository.findByTitulo(titleSearch);
-		
-		Assertions.assertTrue(result.isPresent());
-	}
+	public void findShouldReturnEmptyWhenTitleNotExists() {
 
-	@Test
-	public void findShouldReturnEmptyWhenTituloNotExists() {
-		
-		String titleSearch = "TESTEVIDEO3";
-		
-		Optional<Video> result = this.videoRepository.findByTitulo(titleSearch);
-		
-		Assertions.assertTrue(result.isEmpty());
+		String titleSearch = "_____|";
+
+		Page<Video> result = this.videoRepository.findTitle(titleSearch, this.pageable);
+
+		Assertions.assertTrue(result.getContent().isEmpty());
 	}
 
 	@Test

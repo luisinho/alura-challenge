@@ -1,13 +1,11 @@
 package br.com.alura.aluraflix.services;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,20 +26,29 @@ public class VideoService {
 	private CategoryService categoriaService;
 
 	@Transactional(readOnly = true)
-	public List<VideoDTO> findAllPaged(String search) {
+	public Page<VideoDTO> findAllPaged(String search, PageRequest pageRequest) {
 
-		if (!"".equals(search)) {
+		Page<Video> page;
 
-			Optional<Video> obj = this.videoRepository.findByTitulo(search);
+		try {
 
-			Video entity = obj.orElseThrow(() -> new RegisterNotFoundException("Não foi encontrado o vídeo " + search));
+			if (!"".equals(search)) {
 
-			return Arrays.asList(new VideoDTO(entity));
+				page = this.videoRepository.findTitle(search, pageRequest);
+				this.validateDoesNotExistPage(search, page);
+
+			} else {
+				page = this.videoRepository.findAll(pageRequest);
+				this.validateDoesNotExistPage(search, page);
+			}
+
+		} catch (RegisterNotFoundException e) {
+			throw new RegisterNotFoundException(e.getMessage());
+		} catch (Exception e) {
+			throw new DataBaseException("Ocorreu um erro ao listar os videos.");
 		}
 
-		List<Video> lista = this.videoRepository.findAll();
-
-		return lista.stream().map(video -> new VideoDTO(video)).collect(Collectors.toList());
+		return page.map(video -> new VideoDTO(video));
 	}
 
 	@Transactional(readOnly = true)
@@ -52,7 +59,7 @@ public class VideoService {
 		Video entity = obj.orElseThrow(() -> new RegisterNotFoundException("Não foi encontrado o vídeo com o ID " + id));
 
 		return new VideoDTO(entity);
-	}
+	}	
 
 	@Transactional
 	public VideoDTO save(VideoDTO dto) throws Exception{
@@ -113,6 +120,15 @@ public class VideoService {
 			throw new DataBaseException("Ocorreu um erro ao deletar o video" + id);
 		}
 	}
+
+	private void validateDoesNotExistPage(String search, Page<Video> page) {
+
+        if (!"".equals(search) && page.getContent().isEmpty()) {
+        	throw new RegisterNotFoundException("Não foi encontrado o vídeo com o titulo " + search);
+		} else if("".equals(search) && page.getContent().isEmpty()) {
+			throw new RegisterNotFoundException("Não foi encontrado dados de vídeos.");
+		}
+    }
 
 	private void copyDtoToEntity(VideoDTO dto, Video entity) {
 		

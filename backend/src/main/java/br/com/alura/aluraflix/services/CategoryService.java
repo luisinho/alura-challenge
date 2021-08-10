@@ -1,12 +1,11 @@
 package br.com.alura.aluraflix.services;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +23,11 @@ public class CategoryService {
 	private CategoryRepository categoriaRepository;
 
 	@Transactional(readOnly = true)
-	public List<CategoryDTO> findAllPaged() {
+	public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
 
-		List<Category> lista = this.categoriaRepository.findAll();
+		Page<Category> page = this.categoriaRepository.findAll(pageRequest);
 
-		return lista.stream().map(categoria -> new CategoryDTO(categoria)).collect(Collectors.toList());
+		return page.map(categoria -> new CategoryDTO(categoria));
 	}
 
 	@Transactional(readOnly = true)

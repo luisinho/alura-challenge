@@ -1,8 +1,7 @@
 package br.com.alura.aluraflix.repositories;
 
-import java.util.List;
-import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +12,9 @@ import br.com.alura.aluraflix.entities.Video;
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long> {
 
-	@Query("SELECT video FROM Video video WHERE (COALESCE(:search) IS NOT NULL OR video.titulo = :search)")
-	List<Video> listarVideo(@Param("search") String search);
+	@Query("SELECT video FROM Video video WHERE video.titulo <> 'TESTEVIDEO' ")
+	Page<Video> findAllPaged(Pageable pageable);
 
-	Optional<Video> findByTitulo(String search);
+	@Query("SELECT video FROM Video video WHERE video.titulo LIKE %:title% AND video.titulo <> 'TESTEVIDEO' ")
+	Page<Video> findTitle(@Param("title") String title,Pageable pageable);
 }
