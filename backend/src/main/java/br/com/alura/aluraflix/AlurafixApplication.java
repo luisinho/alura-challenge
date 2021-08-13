@@ -9,5 +9,4 @@ public class AlurafixApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AlurafixApplication.class, args);
 	}
-
 }

@@ -2,6 +2,7 @@ package br.com.alura.aluraflix.entities;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,9 +13,12 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
 @Table(name = "tb_usuario")
-public class User implements Serializable {
+public class User implements UserDetails, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,7 +32,7 @@ public class User implements Serializable {
 	@Column(name = "EMAIL",  length = 50, unique = true)
 	private String email;
 
-	@Column(name = "PASSWORD", columnDefinition = "TEXT")
+	@Column(name = "SENHA", columnDefinition = "TEXT")
 	private String password;
 
 	@Column(name = "CREATED_AT", columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
@@ -120,6 +124,36 @@ public class User implements Serializable {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
+		return true;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return null;
+	}
+
+	@Override
+	public String getUsername() {
+		return email;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {		
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
 		return true;
 	}
 }
