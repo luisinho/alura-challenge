@@ -2,6 +2,7 @@ package br.com.alura.aluraflix.services;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,9 @@ public class CategoryService {
 	@Autowired
 	private CategoryRepository categoriaRepository;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@Transactional(readOnly = true)
 	public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
 
@@ -35,7 +39,7 @@ public class CategoryService {
 
 		Optional<Category> obj = this.categoriaRepository.findById(id);
 
-		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException("Categoria não encontrada!"));
+		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
 
 		return new CategoryDTO(entity);
 	}
@@ -45,7 +49,7 @@ public class CategoryService {
 
 		Optional<Category> obj = this.categoriaRepository.findById(dto.getId());
 
-		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException("Categoria não encontrada!"));
+		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
 
 		return entity;
 	}
@@ -63,7 +67,7 @@ public class CategoryService {
 
 		Optional<Category> obj = this.categoriaRepository.findByTituloIgnoreCase(titulo);
 
-		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException("Categoria não encontrada!"));
+		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
 
 		return entity;
 	}
@@ -84,7 +88,7 @@ public class CategoryService {
 		} catch(RegraNegocioException e) {
 			throw new RegraNegocioException(e.getMessage());
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao criar a categoria!");
+			throw new DataBaseException(this.messageSource.getMessage("category.error.creating", null, null));
 		}
 
 		return new CategoryDTO(entity);
@@ -104,11 +108,11 @@ public class CategoryService {
 			entity = this.categoriaRepository.save(entity);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new DataBaseException("Ocorreu um erro ao atualizar, ID da categoria não encontrado!");
+			throw new DataBaseException(this.messageSource.getMessage("category.error.creating", null, null));
 		}catch  (DataIntegrityViolationException e) {
-			throw new DataBaseException("Integrity violation");
+			throw new DataBaseException(this.messageSource.getMessage("integrity.violation", null, null));
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao atualizar a categoria com o ID " + id);
+			throw new DataBaseException(this.messageSource.getMessage("category.error.updating.with.the.id", null, null) + " " + id);
 		}
 
 		return new CategoryDTO(entity);
@@ -124,11 +128,11 @@ public class CategoryService {
 			this.categoriaRepository.deleteById(id);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new DataBaseException("Ocorreu um erro ao deletar, ID da categoria não encontrado!");
+			throw new DataBaseException(this.messageSource.getMessage("category.error.deleting.id.not.found", null, null));
 		}catch  (RegraNegocioException e) {
 			throw new DataBaseException(e.getMessage());
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao deletar a categoria com o ID " + id);
+			throw new DataBaseException(this.messageSource.getMessage("category.error.deleting.with.the.id", null, null) + " " + id);
 		}
 	}
 
@@ -138,7 +142,7 @@ public class CategoryService {
 		long count = this.categoriaRepository.countVideoPorCategoria(id);
 
 		if (count > 0) {
-			throw new RegraNegocioException("A categoria não pode ser removida, está relacionada com um ou mais vídeos!");
+			throw new RegraNegocioException(this.messageSource.getMessage("category.cannot.removed", null, null));
 		}
 	}
 
@@ -157,13 +161,13 @@ public class CategoryService {
 		}
 
 		if (count == 0 && !dto.getTitulo().equals("LIVRE")) {
-			throw new RegraNegocioException("Não existe categoria cadastrada no banco de dados.A primeira categoria deve ser cadastrada com o título conforme o exemplo LIVRE.");
+			throw new RegraNegocioException(this.messageSource.getMessage("category.title.free.not.exist", null, null));
 		}
 
 		count = this.categoriaRepository.countByTituloIgnoreCase(dto.getTitulo());
 
 		if (count > 0) {
-			throw new RegraNegocioException("Já existe a categoria com o título " + dto.getTitulo());
+			throw new RegraNegocioException(this.messageSource.getMessage("category.title.exist", null, null) + " " + dto.getTitulo());
 		}
 	}
 }

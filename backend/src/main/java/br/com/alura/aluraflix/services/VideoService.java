@@ -2,6 +2,7 @@ package br.com.alura.aluraflix.services;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class VideoService {
 	@Autowired
 	private CategoryService categoriaService;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@Transactional(readOnly = true)
 	public Page<VideoDTO> findAllPaged(String search, PageRequest pageRequest) {
 
@@ -45,7 +49,7 @@ public class VideoService {
 		} catch (RegisterNotFoundException e) {
 			throw new RegisterNotFoundException(e.getMessage());
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao listar os videos.");
+			throw new DataBaseException(this.messageSource.getMessage("video.error.listing", null, null));
 		}
 
 		return page.map(video -> new VideoDTO(video));
@@ -56,7 +60,7 @@ public class VideoService {
 
 		Optional<Video> obj = this.videoRepository.findById(id);
 
-		Video entity = obj.orElseThrow(() -> new RegisterNotFoundException("Não foi encontrado o vídeo com o ID " + id));
+		Video entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("video.not.found.with.the.id", null, null) + " " + id));
 
 		return new VideoDTO(entity);
 	}	
@@ -95,11 +99,11 @@ public class VideoService {
 			entity = this.videoRepository.save(entity);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new RegisterNotFoundException("Id não encontrado " + id);
+			throw new RegisterNotFoundException(this.messageSource.getMessage("video.error.updating.id.not.found", null, null));
 		}catch  (DataIntegrityViolationException e) {
-			throw new DataBaseException("Integrity violation");
+			throw new DataBaseException(this.messageSource.getMessage("integrity.violation", null, null));
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao atualizar o video " + id);
+			throw new DataBaseException(this.messageSource.getMessage("video.error.updating.with.the.id", null, null) + " " + id);
 		}
 
 		return new VideoDTO(entity);
@@ -113,20 +117,20 @@ public class VideoService {
 			this.videoRepository.deleteById(id);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new RegisterNotFoundException("Id não encontrado " + id);
+			throw new RegisterNotFoundException(this.messageSource.getMessage("video.error.deleting.id.not.found", null, null));
 		}catch  (DataIntegrityViolationException e) {
 			throw new DataBaseException("Integrity violation");
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao deletar o video" + id);
+			throw new DataBaseException(this.messageSource.getMessage("video.error.deleting.with.the.id", null, null) + " " + id);
 		}
 	}
 
 	private void validateDoesNotExistPage(String search, Page<Video> page) {
 
         if (!"".equals(search) && page.getContent().isEmpty()) {
-        	throw new RegisterNotFoundException("Não foi encontrado o vídeo com o titulo " + search);
+        	throw new RegisterNotFoundException(this.messageSource.getMessage("video.not.found.search", null, null) + " " + search);
 		} else if("".equals(search) && page.getContent().isEmpty()) {
-			throw new RegisterNotFoundException("Não foi encontrado dados de vídeos.");
+			throw new RegisterNotFoundException(this.messageSource.getMessage("video.not.found.data", null, null));
 		}
     }
 
