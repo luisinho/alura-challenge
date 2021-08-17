@@ -41,7 +41,7 @@ public class UserService implements UserDetailsService {
 	private MessageSource messageSource;
 
 	@Transactional(readOnly = true)
-	public Page<UserDTO> findAllPaged(PageRequest pageRequest) throws Exception {
+	public Page<UserDTO> findAllPaged(PageRequest pageRequest) {
 		
 		LOGGER.info("START METHOD UserService.findAllPage: {} " + pageRequest.toString());
 
@@ -60,13 +60,22 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Transactional
-	public UserDTO findById(Long id) throws Exception {
+	public UserDTO findById(Long id) {
 
 		LOGGER.info("START METHOD UserService.findById: {} " + id);
 
-		Optional<User> obj = this.userRepository.findById(id);
+		User user = new User();
 
-		User user = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("user.not.found.with.the.id", null, null)));
+		try {
+
+			Optional<User> obj = this.userRepository.findById(id);
+
+			user = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("user.not.found.with.the.id", null, null)));
+
+		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo UserService.findById " + e);
+			throw new DataBaseException(this.messageSource.getMessage("user.error.search", null, null) + " " + id);
+		}
 
 		LOGGER.info("END METHOD UserService.findById ");
 
@@ -74,7 +83,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Transactional
-	public UserDTO save(UserInsertDTO dto) throws Exception {
+	public UserDTO save(UserInsertDTO dto) {
 		
 		LOGGER.info("START METHOD UserService.save ");
 
@@ -103,7 +112,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Transactional
-	public UserDTO update(Long id, UserUpdateDTO dto) throws Exception {
+	public UserDTO update(Long id, UserUpdateDTO dto) {
 
 		LOGGER.info("START METHOD UserService.update ");
 
@@ -136,7 +145,7 @@ public class UserService implements UserDetailsService {
 		return new UserDTO(entity);
 	}
 
-	private void copyDtoToEntity(UserDTO dto, User entity) {
+	private void copyDtoToEntity(UserDTO dto, User entity) throws Exception {
 		entity.setEmail(dto.getEmail());
 		entity.setNome(dto.getNome());
 	}

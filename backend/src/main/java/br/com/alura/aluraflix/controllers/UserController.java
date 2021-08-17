@@ -1,8 +1,6 @@
 package br.com.alura.aluraflix.controllers;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 
 import javax.validation.Valid;
 
@@ -10,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
@@ -55,15 +52,7 @@ public class UserController {
 
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 
-		List<UserDTO> emptyList = Collections.emptyList();
-
-		Page<UserDTO> list = new PageImpl<>(emptyList, pageRequest, emptyList.size());
-
-		try {			
-			list = this.userService.findAllPaged(pageRequest);
-		} catch (Exception e) {
-			LOGGER.error("Ocorreu um erro no metodo UserController.findAll " + e);
-		}
+		Page<UserDTO>	list = this.userService.findAllPaged(pageRequest);
 
 		LOGGER.info("END METHOD UserController.findAllPaged");
 
@@ -75,14 +64,8 @@ public class UserController {
 
 		LOGGER.info("START METHOD UserController.findAllPaged: {} " + id);
 
-		UserDTO dto = new UserDTO();
+		UserDTO  dto = this.userService.findById(id);
 
-		try {
-		  dto = this.userService.findById(id);
-		} catch (Exception e) {
-			LOGGER.error("Ocorreu um erro no metodo UserController.findById " + e);
-		}
-		
 		LOGGER.info("END METHOD UserController.findAllPaged");
 
 		return ResponseEntity.ok().body(dto);
@@ -93,13 +76,7 @@ public class UserController {
 
 		LOGGER.info("START METHOD UserController.save");
 
-		UserDTO newdto = new UserDTO();
-
-		try {
-		  newdto = this.userService.save(dto);
-		} catch (Exception e) {
-			LOGGER.error("Ocorreu um erro no metodo UserController.save " + e);
-		}
+		UserDTO	  newdto = this.userService.save(dto);
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(newdto.getId()).toUri();
@@ -114,13 +91,7 @@ public class UserController {
 
 		LOGGER.info("START METHOD UserController.update");
 
-		UserDTO updateDto = new UserDTO();
-
-		try {
-		  updateDto = this.userService.update(id, dto);
-		} catch (Exception e) {
-			LOGGER.error("Ocorreu um erro no metodo UserController.update " + e);
-		}
+		UserDTO  updateDto = this.userService.update(id, dto);
 
 		LOGGER.info("END METHOD UserController.update");
 

@@ -2,7 +2,9 @@ package br.com.alura.aluraflix.dto;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import br.com.alura.aluraflix.entities.User;
 
@@ -13,9 +15,11 @@ public class UserDTO implements Serializable {
 	private Long id;
 
 	@NotBlank(message = "Campo nome requirido!")
+	@Size(min = 3, message = "O campo nome deve conter no minimo 3 caracteres!")
 	private String nome;
 
 	@NotBlank(message = "Campo email requirido!")
+	@Email(message = "Favor entrar um email correto!")
 	private String email;
 
 	public UserDTO() {
