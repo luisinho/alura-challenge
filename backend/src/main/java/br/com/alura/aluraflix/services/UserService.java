@@ -1,8 +1,11 @@
 package br.com.alura.aluraflix.services;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -19,6 +22,7 @@ import br.com.alura.aluraflix.dto.UserInsertDTO;
 import br.com.alura.aluraflix.dto.UserUpdateDTO;
 import br.com.alura.aluraflix.entities.User;
 import br.com.alura.aluraflix.exceptions.RegisterNotFoundException;
+import br.com.alura.aluraflix.exceptions.RegraNegocioException;
 import br.com.alura.aluraflix.repositories.UserRepository;
 import br.com.alura.aluraflix.services.exceptions.DataBaseException;
 
@@ -33,26 +37,52 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@Transactional(readOnly = true)
-	public Page<UserDTO> findAllPage(PageRequest pageRequest) {
+	public Page<UserDTO> findAllPaged(PageRequest pageRequest) throws Exception {
+		
+		LOGGER.info("START METHOD UserService.findAllPage: {} " + pageRequest.toString());
 
 		try {
 
 			Page<User> list = this.userRepository.findAll(pageRequest);
+			
+			LOGGER.info("END METHOD UserService.findAllPage");
 
 			return list.map(x -> new UserDTO(x));
 
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao listar os usuarios.");
+			LOGGER.error("Ocorreu um erro no metodo UserService.findAllPage " + e);
+			throw new DataBaseException(this.messageSource.getMessage("user.error.listing", null, null));
 		}
 	}
 
 	@Transactional
-	public UserDTO save(UserInsertDTO dto) {
+	public UserDTO findById(Long id) throws Exception {
+
+		LOGGER.info("START METHOD UserService.findById: {} " + id);
+
+		Optional<User> obj = this.userRepository.findById(id);
+
+		User user = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("user.not.found.with.the.id", null, null)));
+
+		LOGGER.info("END METHOD UserService.findById ");
+
+		return new UserDTO(user);
+	}
+
+	@Transactional
+	public UserDTO save(UserInsertDTO dto) throws Exception {
+		
+		LOGGER.info("START METHOD UserService.save ");
 
 		User entity = new User();
 
 		try {
+			
+		  this.validateUserEmail(dto);
 
 		  this.copyDtoToEntity(dto, entity);
 
@@ -60,34 +90,51 @@ public class UserService implements UserDetailsService {
 
 		  entity = this.userRepository.save(entity);
 
+		} catch(RegraNegocioException e) {
+			throw new RegraNegocioException(e.getMessage());
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao criar o usuario ");
+			LOGGER.error("Ocorreu um erro no metodo UserService.save " + e);
+			throw new DataBaseException(this.messageSource.getMessage("user.error.creating", null, null));
 		}
+		
+		LOGGER.info("END METHOD UserService.save ");
 
 		return new UserDTO(entity);
 	}
 
 	@Transactional
-	public UserDTO update(Long id, UserUpdateDTO dto) {
+	public UserDTO update(Long id, UserUpdateDTO dto) throws Exception {
+
+		LOGGER.info("START METHOD UserService.update ");
+
+		User entity = new User();
 
 		try {
 
-			User entity = this.userRepository.getById(id);
+			this.validateUserEmail(dto);
+
+			entity = this.userRepository.getById(id);
 
 			this.copyDtoToEntity(dto, entity);
 
 			entity = this.userRepository.save(entity);
 
-			return new UserDTO(entity);
-
-		} catch (EmptyResultDataAccessException e) {
-			throw new RegisterNotFoundException("Id não encontrado " + id);
+		} catch (EmptyResultDataAccessException e) {			
+			throw new RegisterNotFoundException(this.messageSource.getMessage("user.error.updating.id.not.found", null, null));
 		}catch  (DataIntegrityViolationException e) {
-			throw new DataBaseException("Integrity violation");
+			LOGGER.error("Ocorreu um erro no metodo UserService.update() " + e);
+			throw new DataBaseException(this.messageSource.getMessage("integrity.violation", null, null));
+		} catch(RegraNegocioException e) {
+			throw new RegraNegocioException(e.getMessage());
 		} catch (Exception e) {
-			throw new DataBaseException("Ocorreu um erro ao atualizar o usuario " + id);
+			LOGGER.error("Ocorreu um erro no metodo UserService.update() " + e);
+			throw new DataBaseException(this.messageSource.getMessage("user.error.updating.with.the.id", null, null) +  " "  + id);
 		}
-	}	
+
+		LOGGER.info("END METHOD UserService.save ");
+
+		return new UserDTO(entity);
+	}
 
 	private void copyDtoToEntity(UserDTO dto, User entity) {
 		entity.setEmail(dto.getEmail());
@@ -98,17 +145,26 @@ public class UserService implements UserDetailsService {
 	@Transactional(readOnly = true)
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		LOGGER.info("INICIO NO METODO loadUserByUsername: {}" + username);
+		LOGGER.info("START METHOD UserService.loadUserByUsername: {}" + username);
 
 		User user = this.userRepository.findByEmail(username);
 
 		if (user == null) {
-			LOGGER.error("Usuário não encontrado: " + username);
-			throw new UsernameNotFoundException("Usuário não encontrado!");
+			LOGGER.error(this.messageSource.getMessage("use.not.found", null, null) + ": " + username);
+			throw new UsernameNotFoundException(this.messageSource.getMessage("use.not.found", null, null));
 		}
 
-		LOGGER.info("FIM DO METODO loadUserByUsername: {}");
+		LOGGER.info("END METHOD UserService.loadUserByUsername: {}");
 
 		return user;
-	}	
+	}
+
+	private void validateUserEmail(UserDTO dto) {
+
+		long count = this.userRepository.countByEmailIgnoreCase(dto.getEmail());
+
+		if (count > 0) {
+			throw new RegraNegocioException(this.messageSource.getMessage("user.email.exist", null, null) + " " + dto.getEmail());
+		}
+	}
 }

@@ -5,10 +5,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,6 +19,8 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,6 +30,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,6 +59,10 @@ public class VideoControllerTests {
 
 	private PageImpl<VideoDTO> page;
 
+	private String username;
+
+	private String password;
+
 	private Long existingId;
 	
 	private Long nonExistingId;
@@ -63,8 +73,18 @@ public class VideoControllerTests {
 
 	private PageRequest pageRequest;
 
+	@Value("${security.oauth2.client.client-id}")
+	private String clientId;
+
+	@Value("${security.oauth2.client.client-secret}")
+	private String clientSecret;
+
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() throws Exception {		
+
+		this.username = "admin@alura.com.br";
+
+		this.password = "12345678";
 
 		this.existingId = 1l;
 
@@ -106,10 +126,13 @@ public class VideoControllerTests {
 	@Test
 	public void findAllShouldReturnPage() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 		   this.mockMvc.perform(get("/videos")
-			   .contentType(MediaType.APPLICATION_JSON)
-			   .accept(MediaType.APPLICATION_JSON));
+				   .header("Authorization", "Bearer " + accessToken)
+			       .contentType(MediaType.APPLICATION_JSON)
+			       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$.content").exists());
@@ -118,10 +141,13 @@ public class VideoControllerTests {
 	@Test
 	public void findByIdShouldReturnVideoDTOWhenIdExists() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 		   this.mockMvc.perform(get("/videos/{id}", this.existingId)
-			   .contentType(MediaType.APPLICATION_JSON)
-			   .accept(MediaType.APPLICATION_JSON));
+				   .header("Authorization", "Bearer " + accessToken)
+			       .contentType(MediaType.APPLICATION_JSON)
+			       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$.id").exists());
@@ -131,9 +157,12 @@ public class VideoControllerTests {
 	@Test
 	public void findByIdShouldReturnVideoDTOWhenTitleExists() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 				   this.mockMvc.perform(get("/videos?search=" + this.existingTitle)
-					   .accept(MediaType.APPLICATION_JSON));
+						   .header("Authorization", "Bearer " + accessToken)
+					       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$.content").exists());
@@ -142,12 +171,15 @@ public class VideoControllerTests {
 	@Test
 	public void saveShouldReturnVideoDTOWhenCreated() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		String jsonBody = this.objectMapper.writeValueAsString(this.newVideoDTO);
 
 		ResultActions result =
 				   this.mockMvc.perform(post("/videos")
-					   .content(jsonBody)
-					   .contentType(MediaType.APPLICATION_JSON)
+						   .header("Authorization", "Bearer " + accessToken)
+					       .content(jsonBody)
+					       .contentType(MediaType.APPLICATION_JSON)
 					   .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isCreated());
@@ -155,6 +187,8 @@ public class VideoControllerTests {
 
 	@Test
 	public void updateShouldReturnVideoDTOWhenIdExistis() throws Exception {
+
+		String accessToken = this.obtainAccessToken(this.username, this.password);
 
 		String jsonBody = this.objectMapper.writeValueAsString(this.newVideoDTO);
 
@@ -164,9 +198,10 @@ public class VideoControllerTests {
 
 		ResultActions result =
 				   this.mockMvc.perform(put("/videos/{id}", this.existingId)
-					   .content(jsonBody)
-					   .contentType(MediaType.APPLICATION_JSON)
-					   .accept(MediaType.APPLICATION_JSON));
+						   .header("Authorization", "Bearer " + accessToken)
+					       .content(jsonBody)
+					       .contentType(MediaType.APPLICATION_JSON)
+					       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$.id").exists());
@@ -178,10 +213,13 @@ public class VideoControllerTests {
 	@Test
 	public void deleteShouldReturnNoContentWhenIdExistis() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 				   this.mockMvc.perform(delete("/videos/{id}", this.existingId)
-					    .contentType(MediaType.APPLICATION_JSON)
-					   .accept(MediaType.APPLICATION_JSON));
+						   .header("Authorization", "Bearer " + accessToken)
+					       .contentType(MediaType.APPLICATION_JSON)
+					       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("$").value("Vídeo removido com sucesso."));
@@ -190,9 +228,12 @@ public class VideoControllerTests {
 	@Test
 	public void findByIdShouldReturnNotFoundWhenIdDoesNotExists() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 				   this.mockMvc.perform(get("/videos/{id}", this.nonExistingId)
-					   .accept(MediaType.APPLICATION_JSON));
+						   .header("Authorization", "Bearer " + accessToken)
+					       .accept(MediaType.APPLICATION_JSON));
 
 				result.andExpect(status().isNotFound());
 	}
@@ -200,10 +241,13 @@ public class VideoControllerTests {
 	@Test
 	public void findAllShouldReturnNotFoundNonExistingTitle() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 		   this.mockMvc.perform(get("/videos?search=" + this.nonExistingTitle)
-			   .contentType(MediaType.APPLICATION_JSON)
-			   .accept(MediaType.APPLICATION_JSON));
+				   .header("Authorization", "Bearer " + accessToken)
+			       .contentType(MediaType.APPLICATION_JSON)
+			       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isNotFound());
 	}
@@ -211,13 +255,16 @@ public class VideoControllerTests {
 	@Test
 	public void updateShouldReturnNoFoundWhenIdExistis() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		String jsonBody = this.objectMapper.writeValueAsString(this.newVideoDTO);
 
 		ResultActions result =
 				   this.mockMvc.perform(put("/videos/{id}", this.nonExistingId)
-					   .content(jsonBody)
-					   .contentType(MediaType.APPLICATION_JSON)
-					   .accept(MediaType.APPLICATION_JSON));
+						   .header("Authorization", "Bearer " + accessToken)
+					       .content(jsonBody)
+					       .contentType(MediaType.APPLICATION_JSON)
+					       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isNotFound());
 	}
@@ -225,10 +272,32 @@ public class VideoControllerTests {
 	@Test
 	public void deleteShouldReturnNoFoundWhenIdDoesNotExist() throws Exception {
 
+		String accessToken = this.obtainAccessToken(this.username, this.password);
+
 		ResultActions result =
 				   this.mockMvc.perform(delete("/videos/{id}", this.nonExistingId)
-					   .accept(MediaType.APPLICATION_JSON));
+						   .header("Authorization", "Bearer " + accessToken)
+					       .accept(MediaType.APPLICATION_JSON));
 
 		result.andExpect(status().isNotFound());
+	}
+
+	private String obtainAccessToken(String username, String password) throws Exception {
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("grant_type", "password");
+		params.add("client_id", this.clientId);
+		params.add("username", this.username);
+		params.add("password", this.password);
+
+		ResultActions result = mockMvc
+				.perform(post("/oauth/token").params(params).with(httpBasic(this.clientId, this.clientSecret))
+						.accept("application/json;charset=UTF-8"))
+				.andExpect(status().isOk()).andExpect(content().contentType("application/json;charset=UTF-8"));
+
+		String resultString = result.andReturn().getResponse().getContentAsString();
+
+		JacksonJsonParser jsonParser = new JacksonJsonParser();
+		return jsonParser.parseMap(resultString).get("access_token").toString();
 	}
 }

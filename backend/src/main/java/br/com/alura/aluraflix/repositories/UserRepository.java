@@ -8,4 +8,6 @@ import br.com.alura.aluraflix.entities.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
 	User findByEmail(String email);
+
+	long countByEmailIgnoreCase(String email);
 }

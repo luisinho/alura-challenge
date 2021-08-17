@@ -1,6 +1,9 @@
 package br.com.alura.aluraflix.services;
 
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +23,8 @@ import br.com.alura.aluraflix.services.exceptions.DataBaseException;
 @Service
 public class CategoryService {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(CategoryService.class);
+
 	@Autowired
 	private CategoryRepository categoriaRepository;
 
@@ -29,7 +34,25 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
 
-		Page<Category> page = this.categoriaRepository.findAll(pageRequest);
+		LOGGER.info("START METHOD CategoryService.findAllPage: {} " + pageRequest.toString());
+
+		Page<Category> page;
+
+		try {
+
+			page = this.categoriaRepository.findAll(pageRequest);
+
+			if(page.isEmpty() || page.getContent().isEmpty()) {
+
+				throw new RegisterNotFoundException(this.messageSource.getMessage("category.not.found.data", null, null));
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.findAllPaged " + e);
+			throw new DataBaseException(this.messageSource.getMessage("category.error.listing", null, null));
+		}
+
+		LOGGER.info("END METHOD CategoryService.findAllPage");
 
 		return page.map(categoria -> new CategoryDTO(categoria));
 	}
@@ -37,9 +60,22 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public CategoryDTO findById(Long id) {
 
-		Optional<Category> obj = this.categoriaRepository.findById(id);
+		LOGGER.info("START METHOD CategoryService.findById: {} " + id);
 
-		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
+		Category entity = new Category();
+
+		try {
+
+			Optional<Category> obj = this.categoriaRepository.findById(id);
+
+			entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
+
+		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.findById " + e);
+			throw new DataBaseException(this.messageSource.getMessage("category.error.search", null, null) + " " + id);
+		}
+
+		LOGGER.info("END METHOD CategoryService.findById: {} " + id);
 
 		return new CategoryDTO(entity);
 	}
@@ -47,9 +83,22 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public Category findById(CategoryDTO dto) {
 
-		Optional<Category> obj = this.categoriaRepository.findById(dto.getId());
+		LOGGER.info("START METHOD CategoryService.findById: {} " + dto.toString());
 
-		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
+		Category entity = new Category();
+		
+		try {
+			
+			Optional<Category> obj = this.categoriaRepository.findById(dto.getId());
+			
+			entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
+
+		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.findById " + e);
+			throw new DataBaseException(this.messageSource.getMessage("category.error.search", null, null) + " " + dto.getId());
+		}
+
+		LOGGER.info("END METHOD CategoryService.findById: {} " + dto.toString());
 
 		return entity;
 	}
@@ -57,7 +106,18 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public CategoryDTO getVideoByCategory(Long id) {
 
-		Category entity = this.categoriaRepository.getVideoByCategory(id);
+		LOGGER.info("START METHOD CategoryService.getVideoByCategory: {} " + id);
+
+		Category entity = new Category();
+
+		try {
+			entity = this.categoriaRepository.getVideoByCategory(id);
+		}catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.getVideoByCategory " + e);
+			throw new DataBaseException(this.messageSource.getMessage("category.video.by.id", null, null) + " " + id);
+		}
+
+		LOGGER.info("END METHOD CategoryService.getVideoByCategory: {} " + id);
 
 		return new CategoryDTO(entity, entity.getVideos());
 	}
@@ -65,15 +125,29 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public Category getCategoryByTitle(String titulo) {
 
-		Optional<Category> obj = this.categoriaRepository.findByTituloIgnoreCase(titulo);
+		LOGGER.info("START METHOD CategoryService.getCategoryByTitle: {} " + titulo);
 
-		Category entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
+		Category entity = new Category();
+
+		try {
+
+			Optional<Category> obj = this.categoriaRepository.findByTituloIgnoreCase(titulo);
+
+			entity = obj.orElseThrow(() -> new RegisterNotFoundException(this.messageSource.getMessage("category.not.found", null, null)));
+
+		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.getVideoByCategory " + e);
+		}
+
+		LOGGER.info("END METHOD CategoryService.getCategoryByTitle");
 
 		return entity;
 	}
 
 	@Transactional
 	public 	CategoryDTO save(CategoryDTO  dto) {
+
+		LOGGER.info("START METHOD CategoryService.save: {} " + dto.toString());
 
 		Category entity = new Category();
 
@@ -88,14 +162,19 @@ public class CategoryService {
 		} catch(RegraNegocioException e) {
 			throw new RegraNegocioException(e.getMessage());
 		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.save " + e);
 			throw new DataBaseException(this.messageSource.getMessage("category.error.creating", null, null));
 		}
+
+		LOGGER.info("END METHOD CategoryService.save");
 
 		return new CategoryDTO(entity);
 	}
 
 	@Transactional
 	public CategoryDTO update(Long id, CategoryDTO dto) {
+
+		LOGGER.info("START METHOD CategoryService.update: {}, {} " + id + "-" + dto.toString());
 
 		Category entity = null;
 
@@ -112,8 +191,11 @@ public class CategoryService {
 		}catch  (DataIntegrityViolationException e) {
 			throw new DataBaseException(this.messageSource.getMessage("integrity.violation", null, null));
 		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.update " + e);
 			throw new DataBaseException(this.messageSource.getMessage("category.error.updating.with.the.id", null, null) + " " + id);
 		}
+
+		LOGGER.info("START METHOD CategoryService.update");
 
 		return new CategoryDTO(entity);
 	}
@@ -121,38 +203,51 @@ public class CategoryService {
 	@Transactional
 	public void delete(Long id) {
 
+		LOGGER.info("START METHOD CategoryService.delete: {} " + id);
+
 		try {
 
 			this.validateVideoByCategory(id);
 
 			this.categoriaRepository.deleteById(id);
+			
+			LOGGER.info("END METHOD CategoryService.delete");
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new DataBaseException(this.messageSource.getMessage("category.error.deleting.id.not.found", null, null));
+		}catch  (DataIntegrityViolationException e) {
+			throw new DataBaseException(this.messageSource.getMessage("integrity.violation", null, null));
 		}catch  (RegraNegocioException e) {
 			throw new DataBaseException(e.getMessage());
 		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo CategoryService.delete " + e);
 			throw new DataBaseException(this.messageSource.getMessage("category.error.deleting.with.the.id", null, null) + " " + id);
 		}
 	}
 
 	@Transactional(readOnly = true)
-	private void validateVideoByCategory(Long id) {
+	private void validateVideoByCategory(Long id) throws Exception {
+
+		LOGGER.info("START METHOD CategoryService.validateVideoByCategory: {} " + id);
 
 		long count = this.categoriaRepository.countVideoPorCategoria(id);
 
 		if (count > 0) {
 			throw new RegraNegocioException(this.messageSource.getMessage("category.cannot.removed", null, null));
 		}
+
+		LOGGER.info("END METHOD CategoryService.validateVideoByCategory");
 	}
 
-	private void copyDtoToEntity(CategoryDTO dto, Category entity) {
+	private void copyDtoToEntity(CategoryDTO dto, Category entity) throws Exception {
 
 		entity.setCor(dto.getCor().trim());
 		entity.setTitulo(dto.getTitulo().trim());
 	}
 
-	private void validateCategoryName(CategoryDTO dto) {
+	private void validateCategoryName(CategoryDTO dto) throws Exception {
+
+		LOGGER.info("START METHOD CategoryService.validateCategoryName: {} " + dto.toString());
 
 		long count = this.categoriaRepository.count();
 

@@ -1,8 +1,13 @@
 package br.com.alura.aluraflix.controllers;
 
 import java.net.URI;
+
 import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,8 +30,13 @@ import br.com.alura.aluraflix.services.CategoryService;
 @RequestMapping(value = "/categorias")
 public class CategoriaController {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(CategoriaController.class);
+
 	@Autowired
 	private CategoryService categoriaService;
+
+	@Autowired
+	private MessageSource messageSource;
 
 	@GetMapping
 	public ResponseEntity<Page<CategoryDTO>> findAllPaged(
@@ -34,6 +44,14 @@ public class CategoriaController {
 			@RequestParam(value = "linesPerPage", defaultValue = "5") Integer linesPerPage,
 			@RequestParam(value = "direction", defaultValue = "ASC") String direction,
 			@RequestParam(value = "orderBy", defaultValue = "titulo") String orderBy) {
+
+		StringBuffer params = new StringBuffer();
+		params.append(page).append("\n");
+		params.append(linesPerPage).append("\n");
+		params.append(direction).append("\n");
+		params.append(orderBy).append("\n");
+
+		LOGGER.info("START METHOD CategoriaController.findAllPaged: {} {} {} {} " + params);
 
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction),  orderBy);
 
@@ -45,7 +63,11 @@ public class CategoriaController {
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<CategoryDTO> findById(@PathVariable Long id) {
 
-		CategoryDTO dto = this.categoriaService.findById(id);
+		LOGGER.info("START METHOD CategoriaController.findById: {} " + id);
+
+		CategoryDTO  dto = this.categoriaService.findById(id);		
+
+		LOGGER.info("END METHOD CategoriaController.findById");
 
 		return ResponseEntity.ok().body(dto);
 	}
@@ -53,13 +75,19 @@ public class CategoriaController {
 	@GetMapping(value = "/{id}/videos")
 	public ResponseEntity<CategoryDTO> getVideoByCategory(@PathVariable Long id) {
 
+		LOGGER.info("START METHOD CategoriaController.getVideoByCategory: {} " + id);
+
 		CategoryDTO dto = this.categoriaService.getVideoByCategory(id);
+
+		LOGGER.info("END METHOD CategoriaController.getVideoByCategory");
 
 		return ResponseEntity.ok().body(dto);
 	}
 
 	@PostMapping
 	public ResponseEntity<CategoryDTO> save(@Valid @RequestBody CategoryDTO dto) {
+
+		LOGGER.info("START METHOD CategoriaController.save: {} " + dto.toString());
 
 		dto = this.categoriaService.save(dto);
 
@@ -68,13 +96,19 @@ public class CategoriaController {
 				                             .buildAndExpand(dto.getId())
 				                             .toUri();
 
+		LOGGER.info("END METHOD CategoriaController.save");
+
 		return ResponseEntity.created(uri).body(dto);
 	}
 
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @Valid @RequestBody CategoryDTO dto) {
 
+		LOGGER.info("START METHOD CategoriaController.update: {} {} " + id + " - " + dto.toString());
+
 		dto = this.categoriaService.update(id, dto);
+
+		LOGGER.info("START METHOD CategoriaController.update");
 
 		return ResponseEntity.ok().body(dto);
 	}
@@ -82,8 +116,12 @@ public class CategoriaController {
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<String> delete(@PathVariable Long id) {
 
+		LOGGER.info("START METHOD CategoriaController.delete: {} " + id);
+
 		this.categoriaService.delete(id);
 
-		return ResponseEntity.ok(new String("Categoria deletada com sucesso."));
+		LOGGER.info("END METHOD CategoriaController.delete");
+
+		return ResponseEntity.ok(new String(this.messageSource.getMessage("category.deleting.success", null, null)));
 	}
 }

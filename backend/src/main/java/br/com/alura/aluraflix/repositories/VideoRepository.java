@@ -16,5 +16,7 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 	Page<Video> findAllPaged(Pageable pageable);
 
 	@Query("SELECT video FROM Video video WHERE video.titulo LIKE %:title% AND video.titulo <> 'TESTEVIDEO' ")
-	Page<Video> findTitle(@Param("title") String title,Pageable pageable);
+	Page<Video> findTitle(@Param("title") String title, Pageable pageable);
+
+	long countByTituloIgnoreCase(String titulo);
 }
