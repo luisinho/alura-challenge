@@ -46,7 +46,7 @@ cd backend
 
 # executar o projeto
 ./mvnw spring-boot:run
-
+```
 # Autor
 
 Luis Antonio Batista dos Santos
