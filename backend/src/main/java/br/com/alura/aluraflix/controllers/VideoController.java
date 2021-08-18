@@ -64,6 +64,30 @@ public class VideoController {
 		return ResponseEntity.ok().body(list);
 	}
 
+	@GetMapping(value = "/free")
+	public ResponseEntity<Page<VideoDTO>> findFreeVideo(
+			@RequestParam(value = "page", defaultValue = "0") Integer page,
+			@RequestParam(value = "linesPerPage", defaultValue = "5") Integer linesPerPage,
+			@RequestParam(value = "direction", defaultValue = "ASC") String direction,
+			@RequestParam(value = "orderBy", defaultValue = "titulo") String orderBy) {
+
+		StringBuffer params = new StringBuffer();
+		params.append(page).append("\n");
+		params.append(linesPerPage).append("\n");
+		params.append(direction).append("\n");
+		params.append(orderBy).append("\n");
+
+		LOGGER.info("START METHOD VideoController.findFreeVideo: {} {} {} {} " + params);
+
+		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction),  orderBy);
+
+		Page<VideoDTO> list = this.videoService.findFreeVideo(pageRequest);
+
+		LOGGER.info("END METHOD VideoController.findAllPaged");
+
+		return ResponseEntity.ok().body(list);
+	}
+
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<VideoDTO> findById(@PathVariable Long id) {
 

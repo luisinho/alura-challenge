@@ -67,6 +67,29 @@ public class VideoService {
 	}
 
 	@Transactional(readOnly = true)
+	public Page<VideoDTO> findFreeVideo(PageRequest pageRequest) {
+
+		LOGGER.info("START METHOD VideoService.findFreeVideo: {} " + pageRequest.toString());
+
+		Page<Video> page;
+
+		try {
+
+			page = this.videoRepository.findFreeVideo(pageRequest);
+
+			this.validateDoesNotExistPage(null, page);
+
+		} catch (Exception e) {
+			LOGGER.error("Ocorreu um erro no metodo VideoService.findFreeVideo " + e);
+			throw new DataBaseException(this.messageSource.getMessage("video.error.listing", null, null));
+		}
+
+		LOGGER.info("END METHOD VideoService.findFreeVideo");
+
+		return page.map(video -> new VideoDTO(video));
+	}
+
+	@Transactional(readOnly = true)
 	public VideoDTO findById(Long id) {
 
 		LOGGER.info("START METHOD VideoService.findById: {} " + id);
