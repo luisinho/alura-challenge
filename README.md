@@ -17,13 +17,18 @@ A aplicação consiste em um banco de vídeos, categorias e usuários, os quais 
 # Consumindo API no Postman
 
 ## Criar usuário
-![Criar usuario](https://github.com/luisinho/assets-projects/blob/main/movieflix/criar-usuario.png?raw=true)
+ ![Criar usuario](https://github.com/luisinho/assets-projects/blob/main/movieflix/criar-usuario.png?raw=true)
 
 ## Basic auth da aplicação
-![Basic auth](https://github.com/luisinho/assets-projects/blob/main/movieflix/basic_auth_app.png?raw=true)
+ ![Basic auth](https://github.com/luisinho/assets-projects/blob/main/movieflix/basic_auth_app.png?raw=true)
 
 ## Login do usuário
-![Login usuario](https://github.com/luisinho/assets-projects/blob/main/movieflix/login-usuario.png?raw=true)
+ ![Login usuario](https://github.com/luisinho/assets-projects/blob/main/movieflix/login-usuario.png?raw=true)
+
+## Criar Vídeo
+ ![Bearer Token](https://github.com/luisinho/assets-projects/blob/main/movieflix/bearer_token.png?raw=true)
+ 
+ ![Criar Video](https://github.com/luisinho/assets-projects/blob/main/movieflix/save_video.png?raw=true)
 
 # Tecnologias utilizadas
 - Java
